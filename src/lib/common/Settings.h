@@ -105,6 +105,7 @@ public:
     inline static const auto ClipboardSize = QStringLiteral("server/clipboardSize");
     inline static const auto DefaultLockToComputerState = QStringLiteral("server/defaultLockToComputerState");
     inline static const auto DisableLockToComputer = QStringLiteral("server/disableLockToComputer");
+    inline static const auto LockToComputerInGames = QStringLiteral("server/lockToComputerInGames");
     inline static const auto EnableClipboard = QStringLiteral("server/enableClipboard");
     inline static const auto EnableHeartbeat = QStringLiteral("server/enableHeartbeat");
     inline static const auto EnableSwitchDelay = QStringLiteral("server/enableSwitchDelay");
@@ -321,6 +322,7 @@ private:
     , Server::ClipboardSize
     , Server::DefaultLockToComputerState
     , Server::DisableLockToComputer
+    , Server::LockToComputerInGames
     , Server::EnableClipboard
     , Server::EnableHeartbeat
     , Server::EnableSwitchDelay
@@ -375,6 +377,7 @@ private:
     , Security::TlsEnabled
     , Security::CheckPeers
     , Server::EnableClipboard
+    , Server::LockToComputerInGames
     , Server::Win32KeepForeground
   };
 

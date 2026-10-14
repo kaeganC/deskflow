@@ -29,6 +29,7 @@
 #include "platform/MSWindowsScreenSaver.h"
 
 #include <Shlobj.h>
+#include <shellapi.h>
 #include <algorithm>
 #include <comutil.h>
 #include <string.h>
@@ -678,6 +679,69 @@ bool MSWindowsComputer::isAnyMouseButtonDown(uint32_t &buttonID) const
       LOG_DEBUG("locked by \"%s\"", buttonToName[i]);
       return true;
     }
+  }
+
+  return false;
+}
+
+bool MSWindowsComputer::isCursorCapturedByGame() const
+{
+  // the shell reports exclusive fullscreen direct3d apps (most games) as busy
+  if (QUERY_USER_NOTIFICATION_STATE state;
+      SUCCEEDED(SHQueryUserNotificationState(&state)) && state == QUNS_RUNNING_D3D_FULL_SCREEN) {
+    LOG_DEBUG("locked by exclusive fullscreen application");
+    return true;
+  }
+
+  const HWND foreground = GetForegroundWindow();
+  if (foreground == nullptr || foreground == GetShellWindow() || foreground == GetDesktopWindow()) {
+    return false;
+  }
+
+  // games confine the cursor to their window with ClipCursor, windows uses
+  // the same clip rect to stop the cursor reaching other monitors. when not
+  // clipped the rect covers the whole virtual desktop.
+  if (RECT clip; GetClipCursor(&clip)) {
+    const int32_t x = GetSystemMetrics(SM_XVIRTUALSCREEN);
+    const int32_t y = GetSystemMetrics(SM_YVIRTUALSCREEN);
+    const int32_t w = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+    const int32_t h = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+    if (clip.left > x || clip.top > y || clip.right < x + w || clip.bottom < y + h) {
+      LOG_DEBUG(
+          "locked by cursor clip %d,%d %dx%d", clip.left, clip.top, clip.right - clip.left, clip.bottom - clip.top
+      );
+      return true;
+    }
+  }
+
+  // games running borderless fullscreen often hide the cursor and read raw
+  // input instead of clipping. only treat a hidden cursor as captured when
+  // the foreground window covers its whole monitor, so apps that hide the
+  // cursor while typing don't lock us. maximized windows are skipped since
+  // with an auto-hide taskbar they also cover the whole monitor.
+  if (IsZoomed(foreground)) {
+    return false;
+  }
+
+  CURSORINFO cursorInfo{};
+  cursorInfo.cbSize = sizeof(cursorInfo);
+  if (!GetCursorInfo(&cursorInfo) || ((cursorInfo.flags & CURSOR_SHOWING) != 0 && cursorInfo.hCursor != nullptr)) {
+    return false;
+  }
+
+  RECT window;
+  MONITORINFO monitorInfo{};
+  monitorInfo.cbSize = sizeof(monitorInfo);
+  if (!GetWindowRect(foreground, &window) ||
+      !GetMonitorInfo(MonitorFromWindow(foreground, MONITOR_DEFAULTTONEAREST), &monitorInfo)) {
+    return false;
+  }
+
+  const RECT &monitor = monitorInfo.rcMonitor;
+  if (window.left <= monitor.left && window.top <= monitor.top && window.right >= monitor.right &&
+      window.bottom >= monitor.bottom) {
+    LOG_DEBUG("locked by fullscreen application with hidden cursor");
+    return true;
   }
 
   return false;

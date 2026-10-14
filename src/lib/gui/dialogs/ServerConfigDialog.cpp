@@ -46,8 +46,10 @@ ServerConfigDialog::ServerConfigDialog(QWidget *parent, ServerConfig &config)
   ui->lblNewComputer->setPixmap(QIcon::fromTheme("video-display").pixmap(QSize(64, 64)));
   ui->btnBrowseConfigFile->setIcon(QIcon::fromTheme(QIcon::ThemeIcon::DocumentOpen));
 
-  if (!deskflow::platform::isWindows())
+  if (!deskflow::platform::isWindows()) {
     ui->cbWin32KeepForeground->setVisible(false);
+    ui->cbLockToComputerInGames->setVisible(false);
+  }
   initConnections();
 }
 
@@ -86,6 +88,7 @@ void ServerConfigDialog::save()
   Settings::setValue(Settings::Server::SwitchDelay, m_switchDelay);
   Settings::setValue(Settings::Server::DefaultLockToComputerState, m_defaultLockToComputerState);
   Settings::setValue(Settings::Server::DisableLockToComputer, m_disableLockToComputer);
+  Settings::setValue(Settings::Server::LockToComputerInGames, m_lockToComputerInGames);
   Settings::setValue(Settings::Server::EnableSwitchDoubleTap, m_enableSwitchDoubleTap);
   Settings::setValue(Settings::Server::SwitchDoubleTap, m_switchDoubleTap);
   Settings::setValue(Settings::Server::RelativeMouseMoves, m_relativeMouseMoves);
@@ -337,6 +340,14 @@ void ServerConfigDialog::toggleLockToComputer(bool disabled)
   setButtonBoxEnabledButtons();
 }
 
+void ServerConfigDialog::toggleLockToComputerInGames(bool enabled)
+{
+  if (m_lockToComputerInGames == enabled)
+    return;
+  m_lockToComputerInGames = enabled;
+  setButtonBoxEnabledButtons();
+}
+
 void ServerConfigDialog::toggleWin32Foreground(bool enabled)
 {
   if (m_win32keepForeground == enabled)
@@ -396,6 +407,7 @@ void ServerConfigDialog::loadFromConfig()
   m_switchDoubleTap = Settings::value(Settings::Server::SwitchDoubleTap).toInt();
   m_defaultLockToComputerState = Settings::value(Settings::Server::DefaultLockToComputerState).toBool();
   m_disableLockToComputer = Settings::value(Settings::Server::DisableLockToComputer).toBool();
+  m_lockToComputerInGames = Settings::value(Settings::Server::LockToComputerInGames).toBool();
   m_enableClipboard = Settings::value(Settings::Server::EnableClipboard).toBool();
   m_clipboardSize = Settings::value(Settings::Server::ClipboardSize).toUInt();
 
@@ -456,6 +468,7 @@ void ServerConfigDialog::refreshControls()
   toggleExternalConfig(ui->groupExternalConfig->isChecked());
   ui->cbDefaultLockToComputerState->setChecked(m_defaultLockToComputerState);
   ui->cbDisableLockToComputer->setChecked(m_disableLockToComputer);
+  ui->cbLockToComputerInGames->setChecked(m_lockToComputerInGames);
   ui->cbEnableClipboard->setChecked(m_enableClipboard);
   ui->sbClipboardSizeLimit->setEnabled(m_enableClipboard);
   ui->sbClipboardSizeLimit->setValue(m_clipboardSize);
@@ -512,6 +525,7 @@ void ServerConfigDialog::initConnections() const
       ui->cbDefaultLockToComputerState, &QCheckBox::toggled, this, &ServerConfigDialog::toggleDefaultLockToComputerState
   );
   connect(ui->cbDisableLockToComputer, &QCheckBox::toggled, this, &ServerConfigDialog::toggleLockToComputer);
+  connect(ui->cbLockToComputerInGames, &QCheckBox::toggled, this, &ServerConfigDialog::toggleLockToComputerInGames);
   connect(
       &m_computerSetupModel, &ComputerSetupModel::computersChanged, this,
       &ServerConfigDialog::setButtonBoxEnabledButtons
@@ -524,6 +538,7 @@ void ServerConfigDialog::updateControls() const
   const bool writable = Settings::isWritable();
   ui->cbDefaultLockToComputerState->setEnabled(writable);
   ui->cbDisableLockToComputer->setEnabled(writable);
+  ui->cbLockToComputerInGames->setEnabled(writable);
   ui->cbEnableClipboard->setEnabled(writable);
   ui->sbClipboardSizeLimit->setEnabled(writable);
   ui->rbProtocolBarrier->setEnabled(writable);
@@ -552,6 +567,7 @@ void ServerConfigDialog::restoreFromDefaults()
   m_switchDoubleTap = Settings::defaultValue(Settings::Server::SwitchDoubleTap).toInt();
   m_defaultLockToComputerState = Settings::defaultValue(Settings::Server::DefaultLockToComputerState).toBool();
   m_disableLockToComputer = Settings::defaultValue(Settings::Server::DisableLockToComputer).toBool();
+  m_lockToComputerInGames = Settings::defaultValue(Settings::Server::LockToComputerInGames).toBool();
   m_enableClipboard = Settings::defaultValue(Settings::Server::EnableClipboard).toBool();
   m_clipboardSize = Settings::defaultValue(Settings::Server::ClipboardSize).toUInt();
 
@@ -604,6 +620,7 @@ bool ServerConfigDialog::isGeneralConfigModified() const
          m_relativeMouseMoves != Settings::value(Settings::Server::RelativeMouseMoves).toBool() ||
          m_win32keepForeground != Settings::value(Settings::Server::Win32KeepForeground).toBool() ||
          m_disableLockToComputer != Settings::value(Settings::Server::DisableLockToComputer).toBool() ||
+         m_lockToComputerInGames != Settings::value(Settings::Server::LockToComputerInGames).toBool() ||
          m_defaultLockToComputerState != Settings::value(Settings::Server::DefaultLockToComputerState).toBool();
 }
 
@@ -623,6 +640,7 @@ bool ServerConfigDialog::isGeneralConfigDefault() const
          m_relativeMouseMoves == Settings::defaultValue(Settings::Server::RelativeMouseMoves).toBool() &&
          m_win32keepForeground == Settings::defaultValue(Settings::Server::Win32KeepForeground).toBool() &&
          m_disableLockToComputer == Settings::defaultValue(Settings::Server::DisableLockToComputer).toBool() &&
+         m_lockToComputerInGames == Settings::defaultValue(Settings::Server::LockToComputerInGames).toBool() &&
          m_defaultLockToComputerState == Settings::defaultValue(Settings::Server::DefaultLockToComputerState).toBool();
 }
 

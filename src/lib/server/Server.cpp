@@ -365,6 +365,14 @@ bool Server::isLockedToComputerServer() const
 
 bool Server::isLockedToComputer() const
 {
+  // locked if a game on the primary has captured the cursor. this has its
+  // own option so it isn't affected by disabling the scroll lock behaviour.
+  // only applies while on the primary; the game can't hold the cursor once
+  // we've left.
+  if (m_lockToComputerInGames && m_active == m_primaryClient && m_primaryClient->isCursorCapturedByGame()) {
+    return true;
+  }
+
   if (m_disableLockToComputer) {
     return false;
   }
@@ -1107,6 +1115,8 @@ void Server::processOptions()
       m_defaultLockToComputerState = (value != 0);
     } else if (id == kOptionDisableLockToComputer) {
       m_disableLockToComputer = (value != 0);
+    } else if (id == kOptionLockToComputerInGames) {
+      m_lockToComputerInGames = (value != 0);
     } else if (id == kOptionClipboardSharing) {
       m_enableClipboard = value;
       if (!m_enableClipboard) {

@@ -55,6 +55,7 @@ static const OptionID kOptionRelativeMouseMoves = OPTION_CODE("MDLT");
 static const OptionID kOptionWin32KeepForeground = OPTION_CODE("_KFW");
 static const OptionID kOptionDefaultLockToComputerState = OPTION_CODE("LTSS");
 static const OptionID kOptionDisableLockToComputer = OPTION_CODE("DLTS");
+static const OptionID kOptionLockToComputerInGames = OPTION_CODE("LTGM");
 static const OptionID kOptionClipboardSharing = OPTION_CODE("CLPS");
 static const OptionID kOptionClipboardSharingSize = OPTION_CODE("CLSZ");
 //@}

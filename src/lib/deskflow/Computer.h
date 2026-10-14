@@ -237,6 +237,14 @@ public:
   */
   bool isLockedToComputer() const;
 
+  //! Test if a game has captured the cursor
+  /*!
+  Returns true if the foreground application (typically a game) has
+  captured the cursor on this computer.  Always false on secondary
+  computers.
+  */
+  bool isCursorCapturedByGame() const;
+
   //! Get jump zone size
   /*!
   Return the jump zone size, the size of the regions on the edges of

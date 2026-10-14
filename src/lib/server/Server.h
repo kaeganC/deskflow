@@ -467,5 +467,8 @@ private:
 
   bool m_defaultLockToComputerState = false;
   bool m_disableLockToComputer = false;
+
+  // lock to the primary computer while a game has captured the cursor
+  bool m_lockToComputerInGames = true;
   bool m_enableClipboard = true;
 };

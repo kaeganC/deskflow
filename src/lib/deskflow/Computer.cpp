@@ -365,6 +365,11 @@ bool Computer::isLockedToComputer() const
   return false;
 }
 
+bool Computer::isCursorCapturedByGame() const
+{
+  return m_isPrimary && m_computer->isCursorCapturedByGame();
+}
+
 int32_t Computer::getJumpZoneSize() const
 {
   if (!m_isPrimary) {

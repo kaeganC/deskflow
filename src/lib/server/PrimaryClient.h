@@ -96,6 +96,12 @@ public:
   */
   bool isLockedToComputer() const;
 
+  //! Test if a game has captured the cursor
+  /*!
+  Returns true if a game on the primary computer has captured the cursor.
+  */
+  bool isCursorCapturedByGame() const;
+
   //@}
 
   // FIXME -- these probably belong on IComputer

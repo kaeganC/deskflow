@@ -165,6 +165,20 @@ public:
   */
   virtual bool isAnyMouseButtonDown(uint32_t &buttonID) const = 0;
 
+  //! Test if a game has captured the cursor
+  /*!
+  Return true if the foreground application (typically a game) has taken
+  control of the cursor, e.g. by confining it with a clip rectangle,
+  running in exclusive fullscreen, or hiding it in a fullscreen window.
+  While captured the cursor should not leave the computer, mimicking how
+  the OS keeps a captured cursor on the game's monitor.  Platforms that
+  cannot detect this return false.
+  */
+  virtual bool isCursorCapturedByGame() const
+  {
+    return false;
+  }
+
   //! Get cursor center position
   /*!
   Return the cursor center position which is where we park the

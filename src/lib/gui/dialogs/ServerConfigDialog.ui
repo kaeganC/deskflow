@@ -351,6 +351,16 @@
            </widget>
           </item>
           <item>
+           <widget class="QCheckBox" name="cbLockToComputerInGames">
+            <property name="toolTip">
+             <string>Keep the cursor on this computer while a game has captured it (exclusive fullscreen, cursor confined to the game window, or hidden in a fullscreen window)</string>
+            </property>
+            <property name="text">
+             <string>Lock to computer while a &amp;game is using the mouse (Windows only)</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QCheckBox" name="cbDefaultLockToComputerState">
             <property name="text">
              <string>Enable lock to computer at startup</string>

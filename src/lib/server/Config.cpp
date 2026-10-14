@@ -550,6 +550,7 @@ void Config::readSectionOptions(ConfigReadContext &s)
       "", kOptionDefaultLockToComputerState, Settings::value(Settings::Server::DefaultLockToComputerState).toBool()
   );
   addOption("", kOptionDisableLockToComputer, Settings::value(Settings::Server::DisableLockToComputer).toBool());
+  addOption("", kOptionLockToComputerInGames, Settings::value(Settings::Server::LockToComputerInGames).toBool());
   addOption("", kOptionRelativeMouseMoves, Settings::value(Settings::Server::RelativeMouseMoves).toBool());
   addOption("", kOptionWin32KeepForeground, Settings::value(Settings::Server::Win32KeepForeground).toBool());
   addOption("", kOptionClipboardSharing, Settings::value(Settings::Server::EnableClipboard).toBool());
