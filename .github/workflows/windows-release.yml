@@ -1,0 +1,80 @@
+# Builds a Windows x64 installer and publishes it as a GitHub release.
+# Triggered by pushing a tag like `gaming-1`, or manually from the Actions tab.
+
+name: Windows Release
+
+on:
+  push:
+    tags:
+      - "gaming-*"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows:
+    name: windows-2022-x64
+    runs-on: windows-2022
+    timeout-minutes: 60
+    permissions:
+      contents: write
+
+    steps:
+      # Fancy checkout gets all the tags
+      - name: Fancy Checkout
+        uses: sithlord48/fancy-checkout@v2
+
+      # This effectively runs `vcvarsall.bat`, etc. It's not actually installing
+      # VC++ as that's already pre-installed on the Windows runner.
+      - name: Setup VC++ environment
+        uses: TheMrMilchmann/setup-msvc-dev@v4
+        with:
+          arch: amd64
+          spectre: true
+
+      - name: Install dependencies
+        id: get-deps
+        uses: ./.github/actions/install-dependencies
+        with:
+          qt-version: 6.12
+          vcpkg-triplet: x64-windows-release
+
+      - name: Package label
+        shell: bash
+        run: echo "PACKAGE_LABEL=${GITHUB_REF_NAME//\//-}" >> $GITHUB_ENV
+
+      - name: Configure
+        run: cmake -Bbuild -G Ninja -DCMAKE_BUILD_TYPE=Release -DSKIP_BUILD_TESTS=ON ${{ steps.get-deps.outputs.vcpkg-cmake-config }} -DPACKAGE_VERSION_LABEL="${{ env.PACKAGE_LABEL }}"
+
+      - name: Build
+        shell: bash
+        run: cmake --build build --config Release -j8 --target package
+
+      - name: Checksums
+        shell: bash
+        run: |
+          cd build
+          sha256sum deskflow[-_]*.* > sums.txt
+          cat sums.txt
+
+      - name: Upload
+        uses: actions/upload-artifact@v7
+        with:
+          name: deskflow-windows-x64
+          path: |
+            ${{ github.workspace }}/build/deskflow[-_]*.*
+            ${{ github.workspace }}/build/sums.txt
+
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v3
+        with:
+          token: "${{ secrets.GITHUB_TOKEN }}"
+          name: "Deskflow ${{ github.ref_name }} (Windows)"
+          generate_release_notes: true
+          prerelease: true
+          files: |
+            build/deskflow[-_]*.*
+            build/sums.txt
